@@ -1,0 +1,77 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+    <id>release</id>
+
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <!--<fileSet>
+            <includes>
+                <include>**/resources/**</include>
+&lt;!&ndash;                <include>**/classes/org/**</include>&ndash;&gt;
+&lt;!&ndash;                <include>**/resources/image/**</include>&ndash;&gt;
+            </includes>
+        </fileSet>-->
+
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>${project.build.finalName}.jar</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>resources/</directory>
+            <outputDirectory>resources/</outputDirectory>
+            <includes>
+                <include>**/**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>lib/</directory>
+            <outputDirectory>lib/</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <!--<fileSet>
+            <directory>src/main/java/demo/</directory>
+            <outputDirectory>classes/</outputDirectory>
+            <includes>
+                <include>GUI.form</include>
+            </includes>
+        </fileSet>-->
+        <!--<fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>**/**/*</include>
+            </includes>
+        </fileSet>-->
+    </fileSets>
+
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>true</useProjectArtifact>
+            <outputDirectory>lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+
+    <files>
+        <file>
+            <source>config.properties</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+        <!--<file>
+            <source>run.bat</source>
+            <outputDirectory>/</outputDirectory>
+        </file>-->
+    </files>
+</assembly>
+
+<!-- mvn -X clean package -Dmaven.test.skip=true assembly:single -f pom.xml  -->

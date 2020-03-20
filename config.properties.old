@@ -1,0 +1,12 @@
+
+#project_path=C:\\projects\\vz-fgw-backend
+project_path=C:/projects/vz-fgw-backend
+previous_commit_id=b2c29ebc9f9ed67fd7618cbc947b34d71ac4816e
+last_commit_id=9e5162734532b223d0a36fba676abe81e33ffe5a
+
+#output_path=C:\\Users\\vzoom\\Desktop\\package2\\
+output_path=C:/Users/vzoom/Desktop/package
+multi_projects=
+jars_copy_to_lib=jsqlparser-1.0.jar,mybatis-3.4.2.jar,mybatis-plus-2.1-gamma.jar,mybatis-spring-1.3.1.jar,druid-1.1.20.jar
+exclusion_properties=true
+exclusion_other_project=false
