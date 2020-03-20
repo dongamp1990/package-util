@@ -19,7 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Hello world!
+ * 打包程序
+ * @author dongamp1990@gmail.com
  */
 public class PackageMainApp {
 
@@ -104,37 +105,8 @@ public class PackageMainApp {
        }
        copyFile(files);
     }
-/*
-    public static void packageFile() throws IOException, URISyntaxException {
-        fileNameMap.put("fgw-bank", "fgw-bank");
-        fileNameMap.put("fgw-web", "vz-fgw");
-        for (String p : PROJECTS) {
-            System.out.println("=======开始处理 " + p + " =======");
-            logTextArea.append("=======开始处理 " + p + " =======" + LINE);
-            preCreatePath(BASE_PATH + p);
-            ZIPUtil.compress(BASE_PATH + p + "/WEB-INF", BASE_PATH + fileNameMap.get(p) + "-" + dateFormat.format(new Date()) + ".zip");
-            System.out.println("=======处理 " + p + " 结束=======");
-            logTextArea.append("=======处理 " + p + " 结束=======" + LINE);
-        }
-    }*/
 
     public static void main(String[] args) throws Exception {
-//        test();
-
-        /*Process process = Runtime.getRuntime().exec("javac");
-        BufferedReader stdoutReader = new BufferedReader(new InputStreamReader(process.getInputStream(), "GBK"));
-        BufferedReader stderrReader = new BufferedReader(new InputStreamReader(process.getErrorStream(), "GBK"));
-        String line;
-        System.out.println("OUTPUT");
-        while ((line = stdoutReader.readLine()) != null) {
-            System.out.println(line);
-        }
-        System.out.println("ERROR");
-        while ((line = stderrReader.readLine()) != null) {
-            System.out.println(line);
-        }
-        int exitVal = process.waitFor();
-        System.out.println("process exit value is " + exitVal);*/
 
     }
 
@@ -206,6 +178,8 @@ public class PackageMainApp {
                     if (!fileName.contains(project))
                         formFile = PROJECT_PATH + project + cPath;
                     toFile = BASE_PATH + project + CLASSES_PATH + classPath;
+                    //复制内部类class
+                    copyInnerClass(fName, formFile, toFile);
                 } else if (fileName.contains("src/main/resources")) {
                     //resources路径
                     //过滤properties
@@ -316,6 +290,43 @@ public class PackageMainApp {
         }
     }
 
+    private static void copyInnerClass(String fileName, String formFileName, String toFileName) {
+        //fName eg: xxx.class
+        //C:\projects\springlearn\target\classes\com\yibida\juc\volatileP\TestApp.class
+        //C:\projects\springlearn\target\classes\com\yibida\juc\volatileP\
+        String path = formFileName.replace(fileName, "");
+//        System.out.println(path);
+        String toPath = toFileName.replace(fileName, "");
+//        System.out.println(toPath);
+        String fName = fileName.replace(".class", "");
+        File file = new File(path);
+        File[] files = file.listFiles();
+        if (files == null || files.length == 0) return;
+        for (File f : file.listFiles()) {
+            //判断是否fName开头的，且不跟fileName相同
+            if (f.getName().contains(fName) && !f.getName().equalsIgnoreCase(fileName)) {
+                String form = path + f.getName();
+                String to = toPath + f.getName();
+//                System.out.println(form);
+//                System.out.println(to);
+                System.out.println("复制" + form +" -----> " + to);
+                logTextArea.append("复制" + form +" -----> " + to + LINE);
+                try {
+                    Files.copy(Paths.get(form),  Paths.get(to), StandardCopyOption.REPLACE_EXISTING);
+                }catch (FileNotFoundException e) {
+                    System.out.println("FileNotFound : " +e.getMessage());
+                    logTextArea.append("FileNotFound : " +e.getMessage() + form + LINE);
+                }catch (NoSuchFileException e) {
+                    System.out.println("NoSuchFile : " + e.getMessage());
+                    logTextArea.append("NoSuchFile : " + e.getMessage() + form + LINE);
+                } catch (IOException e) {
+                    System.out.println("IOException : " + e.getMessage());
+                    logTextArea.append("IOException : " + e.getMessage() + form + LINE);
+                }
+            }
+        }
+    }
+
     public static List<String> diffMethod(String gitPath, String child, String parent) throws IOException {
         Git git = null;
         int count = 0;
@@ -358,10 +369,6 @@ public class PackageMainApp {
                     continue;
                 }
                 String path = diffEntry.getPath(DiffEntry.Side.NEW);
-//                df.format(diffEntry);
-//                String diffText = out.toString("UTF-8");
-//                System.out.println(diffText);
-                //  out.reset();
                 fileList.add(path);
             }
             return fileList;

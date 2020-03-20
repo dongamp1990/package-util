@@ -19,6 +19,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * git提交窗口类
+ * @author dongamp1990@gmail.com
+ */
 public class GitCommitDialog extends JDialog {
     private final DefaultListModel defaultListModel1 = new DefaultListModel();
     private JScrollPane jScrollPane;

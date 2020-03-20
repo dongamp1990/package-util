@@ -31,6 +31,10 @@ import java.util.Properties;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
+/**
+ * GUI窗口类
+ * @author dongamp1990@gmail.com
+ */
 public class PackageGUI extends JFrame implements WindowListener {
     JPanel jPanel1;
     JTextField gitPathTextField;
@@ -288,21 +292,21 @@ public class PackageGUI extends JFrame implements WindowListener {
         propertiesBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser jf = null;
-                if (propertiesFile.getText() != null && propertiesFile.getText().length() > 0) {
-                    jf = new JFileChooser(propertiesFile.getText());
-                }else {
-                    jf = new JFileChooser(System.getProperty("user.dir"));
-                }
-                jf.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                jf.showOpenDialog(jPanel1);//显示打开的文件对话框
-                File f = jf.getSelectedFile();//使用文件类获取选择器选择的文件
-                if (f != null) {
-                    propertiesFile.setText(f.getAbsolutePath());
-                }
-                if (propertiesFile.getText() != null && propertiesFile.getText().length() > 0) {
-                    loadProperties(propertiesFile.getText(), false);
-                }
+            JFileChooser jf = null;
+            if (propertiesFile.getText() != null && propertiesFile.getText().length() > 0) {
+                jf = new JFileChooser(propertiesFile.getText());
+            }else {
+                jf = new JFileChooser(System.getProperty("user.dir"));
+            }
+            jf.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            jf.showOpenDialog(jPanel1);//显示打开的文件对话框
+            File f = jf.getSelectedFile();//使用文件类获取选择器选择的文件
+            if (f != null) {
+                propertiesFile.setText(f.getAbsolutePath());
+            }
+            if (propertiesFile.getText() != null && propertiesFile.getText().length() > 0) {
+                loadProperties(propertiesFile.getText(), false);
+            }
             }
         });
         //加载配置文件
