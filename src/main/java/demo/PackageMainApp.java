@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * 打包程序
@@ -31,7 +32,7 @@ public class PackageMainApp {
     private static Map<String, String> fileNameMap = new HashMap<>();
     private static String parentId;
     private static String childId;
-    private Properties properties;
+    private static Properties properties;
     private static String jars_copy_to_lib;
     private static boolean exclusion_properties;
     private static boolean isMultiProject = false;
@@ -40,6 +41,8 @@ public class PackageMainApp {
     private static JTextArea logTextArea;
     public static String LINE = "\r\n";
     private static String pathPrefix;
+
+    private static String GIT_PATH;
 
     public PackageMainApp(Properties properties, JTextArea logTextArea2) {
         this.properties = properties;
@@ -50,12 +53,19 @@ public class PackageMainApp {
     private void init(){
         try {
             BASE_PATH = properties.getProperty("output_path");
-            if (BASE_PATH != null) {
+            GIT_PATH = properties.getProperty("git_path");
+            if (!GIT_PATH.endsWith(File.separator) && !GIT_PATH.endsWith("\\")) {
+                GIT_PATH += File.separator;
+            }
+            if (!BASE_PATH.endsWith(File.separator) && !BASE_PATH.endsWith("\\")) {
+                BASE_PATH += File.separator;
+            }
+            /*if (BASE_PATH != null) {
                 String c = BASE_PATH.substring(BASE_PATH.length() - 1, BASE_PATH.length());
                 if (c != "/" || c != "\\") {
                     BASE_PATH += "/";
                 }
-            }
+            }*/
             //多项目一起打包
             String multiProjdcts = properties.getProperty("multi_projects");
             String projectPath = properties.getProperty("project_path");
@@ -75,8 +85,8 @@ public class PackageMainApp {
             }else {
                 PROJECTS = multiProjdcts.split(",");
                 PROJECT_PATH = projectPath;
-                if (!PROJECT_PATH.endsWith("/") && !PROJECT_PATH.endsWith("\\")) {
-                    PROJECT_PATH += "/";
+                if (!PROJECT_PATH.endsWith(File.separator) && !PROJECT_PATH.endsWith("\\")) {
+                    PROJECT_PATH += File.separator;
                 }
                 isMultiProject = true;
             }
@@ -88,6 +98,7 @@ public class PackageMainApp {
 
             int index = projectPath.lastIndexOf("/") > 0 ? projectPath.lastIndexOf("/") : projectPath.lastIndexOf("\\");
             pathPrefix = projectPath.substring(index + 1, projectPath.length());
+            //执行打包
             run();
         } catch (Exception e) {
             System.out.println("读取配置文件错误");
@@ -97,7 +108,7 @@ public class PackageMainApp {
     }
 
     public void run() throws Exception {
-       List<String> files = diffMethod(PROJECT_PATH, childId, parentId);
+       List<String> files = diffMethod(GIT_PATH, childId, parentId);
        if (files == null || files.isEmpty()) {
            System.out.println("没有更改的文件");
            logTextArea.append("没有更改的文件" + LINE);
@@ -141,9 +152,10 @@ public class PackageMainApp {
     private static String TEMPLATES_PATH = "/WEB-INF/templates/";
     private static String RESOURCES_PATH = "src/main/resources/";
     private static String WEBAPP_PATH = "src/main/webapp/";
-    private static String JAVA_PATH = "src/main/java/";
+    private static String JAVA_PATH = "/src/main/java/";
     private static String LIB_PATH = "/WEB-INF/lib/";
 
+    private static String pattern = "/|\\\\";
     public static void copyFile(List<String> files) throws Exception {
         boolean hasCoped = false;
         for (String project : PROJECTS) {
@@ -153,7 +165,15 @@ public class PackageMainApp {
             preCreatePath(project);
             for (String fileName : files) {
                 //跳过不是当前项目的文件
-                if (!fileName.contains(project) && exclusion_other_project && isMultiProject) continue;
+
+                if (!fileName.contains(project) && exclusion_other_project && isMultiProject) {
+                    //不包含项目路径，但git地址和项目地址一致，不需要跳过
+                    String git = GIT_PATH.replaceAll(pattern, "");
+                    String p = PROJECT_PATH.replaceAll(pattern, "");
+                    if (!git.equals(p)) {
+                        continue;
+                    }
+                }
                 hasCoped = true;
                 String formFile = null;
                 String toFile = null;
@@ -165,19 +185,25 @@ public class PackageMainApp {
 //                    String classPath = fileClassName.substring(0, fileClassName.lastIndexOf("/"));
                     String classPath = fileClassName;
 //                    String classPath = fileName.substring(index == 0 ? index + project.length() : index);
-                    classPath = classPath.replace(JAVA_PATH, "");
+                    //得到只含包名的文件路径
+                    String packagePathFileName = classPath.substring(classPath.indexOf(JAVA_PATH) + JAVA_PATH.length());
+                    //去掉src/main/java
+                    classPath = classPath.replace(JAVA_PATH, TARGET_CLASSES_PATH);
                     classPath = classPath.replace(".java", ".class");
-                    classPath = classPath.replace(project + "/", "");
+//                    classPath = classPath.replace(project + "/", "");
+
                     String cPath = TARGET_CLASSES_PATH + classPath;
-                    Path targetPath = Paths.get(BASE_PATH + project + CLASSES_PATH + classPath.replace(fName, ""));
+                    Path targetPath = Paths.get(BASE_PATH + project + CLASSES_PATH + packagePathFileName.replace(fName, ""));
                     if (!Files.exists(targetPath)) {
                         Files.createDirectories(targetPath);
                     }
-                    if (fileName.contains(project))
+                    /*if (fileName.contains(project))
                         formFile = PROJECT_PATH + project + cPath;
                     if (!fileName.contains(project))
-                        formFile = PROJECT_PATH + project + cPath;
-                    toFile = BASE_PATH + project + CLASSES_PATH + classPath;
+                        formFile = PROJECT_PATH + project + cPath;*/
+                    formFile = PROJECT_PATH + TARGET_CLASSES_PATH+packagePathFileName;
+
+                    toFile = BASE_PATH + project + CLASSES_PATH + packagePathFileName;
                     //复制内部类class
                     copyInnerClass(fName, formFile, toFile);
                 } else if (fileName.contains("src/main/resources")) {
@@ -196,11 +222,12 @@ public class PackageMainApp {
                     if (!Files.exists(targetPath)) {
                         Files.createDirectories(targetPath);
                     }
-                    if (fileName.contains(project)) {
+                    /*if (fileName.contains(project)) {
                         formFile = PROJECT_PATH + fileName;
                     }else {
                         formFile = PROJECT_PATH + project + "/" + fileName;
-                    }
+                    }*/
+                    formFile = PROJECT_PATH + fileName;
                     toFile = targetPath + "/" + fName;
                 } /*else if (fileName.contains("/WEB-INF")) {
                     //WEB-INF
@@ -228,10 +255,11 @@ public class PackageMainApp {
                     if (!Files.exists(targetPath)) {
                         Files.createDirectories(targetPath);
                     }
-                    if (fileName.contains(project))
+                    /*if (fileName.contains(project))
                         formFile = PROJECT_PATH + fileName;
                     else
-                        formFile = PROJECT_PATH + project + "/" + fileName;
+                        formFile = PROJECT_PATH + project + "/" + fileName;*/
+                    formFile = PROJECT_PATH + fileName;
                     toFile = targetPath + "/" + fName;
                     /*Files.copy(Paths.get(formFile), Paths.get(toFile), StandardCopyOption.REPLACE_EXISTING);
                     System.out.println("复制" + formFile);*/

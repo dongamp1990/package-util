@@ -101,6 +101,8 @@ public class GitCommitDialog extends JDialog {
         }
         try {
             defaultListModel1.clear();
+            parent.lastCommitIdTextField.setText("");
+            parent.previousCommitIdTextField.setText("");
             Git git = Git.open(new File(parent.gitPathTextField.getText()));
             Repository repo = git.getRepository();
             RevWalk revWalk = new RevWalk(repo);
@@ -113,7 +115,7 @@ public class GitCommitDialog extends JDialog {
                 if (message.length() >= 50) {
                     message = message.substring(0, 50);
                 }else {
-                    message  += appendSpeac(message,50);
+                    message  = appendSpeac(message,50);
                 }
                 defaultListModel1.addElement(simpleDateFormat.format(new Date(revCommit.getCommitTime() * 1000L))
                         + "|" + message + "|" + revCommit.getId().name());
