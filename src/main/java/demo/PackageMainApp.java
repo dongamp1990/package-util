@@ -332,7 +332,7 @@ public class PackageMainApp {
         if (files == null || files.length == 0) return;
         for (File f : file.listFiles()) {
             //判断是否fName开头的，且不跟fileName相同
-            if (f.getName().contains(fName) && !f.getName().equalsIgnoreCase(fileName)) {
+            if (f.getName().startsWith(fName) && !f.getName().equalsIgnoreCase(fileName)) {
                 String form = path + f.getName();
                 String to = toPath + f.getName();
 //                System.out.println(form);

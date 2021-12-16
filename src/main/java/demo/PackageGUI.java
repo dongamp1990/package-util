@@ -259,9 +259,9 @@ public class PackageGUI extends JFrame implements WindowListener {
                         gitPathTextField.requestFocus();
                         return;
                     }
-                    if (gitPathTextField.getText().length() > 0) {
+                    /*if (gitPathTextField.getText().length() > 0) {
                         dialog.loadGit();
-                    }
+                    }*/
                     if (outPathTextField.getText() == null || "".equalsIgnoreCase(outPathTextField.getText())) {
                         JOptionPane.showMessageDialog(jPanel1, "请选择输出路径", "提示", JOptionPane.WARNING_MESSAGE);
                         outPathTextField.setFocusable(true);
